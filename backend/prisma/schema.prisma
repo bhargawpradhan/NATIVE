@@ -1,0 +1,50 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  loans     Loan[]
+
+  @@map("users")
+}
+
+model Loan {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  friendName String
+  amount     Decimal   @db.Decimal(12, 2)
+  dueDate    DateTime  @db.Date
+  repaidAt   DateTime?
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId, dueDate])
+  @@index([userId, repaidAt])
+  @@index([userId, createdAt])
+  @@map("loans")
+}
+
+model OtpChallenge {
+  id         String    @id @default(cuid())
+  phone      String
+  otpHash    String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, expiresAt])
+  @@index([phone, consumedAt])
+  @@map("otp_challenges")
+}

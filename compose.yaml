@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: miniledger-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: miniledger_dev
+      POSTGRES_PASSWORD: miniledger_dev_secret
+      POSTGRES_DB: miniledger_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miniledger_dev -d miniledger_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  postgres_data:
+    name: miniledger_postgres_data
